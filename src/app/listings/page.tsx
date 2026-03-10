@@ -90,9 +90,14 @@ export default function ListingsPage() {
             {listings.map((listing) => (
               <Link key={listing.id} href={`/listings/${listing.id}`}>
                 <div className="bg-slate-800 border border-slate-700 rounded-xl p-5 hover:border-blue-500 transition-all cursor-pointer">
-                  <div className="bg-slate-700 rounded-lg h-40 mb-4 flex items-center justify-center">
-                    <span className="text-slate-500 text-sm">Нет фото</span>
-                  </div>
+{listing.images && listing.images.length > 0 ? (
+  <img src={listing.images[0]} alt={listing.title}
+    className="w-full h-40 object-cover rounded-lg mb-4" />
+) : (
+  <div className="bg-slate-700 rounded-lg h-40 mb-4 flex items-center justify-center">
+    <span className="text-slate-500 text-sm">Нет фото</span>
+  </div>
+)}
                   <h3 className="text-white font-semibold text-lg mb-1 truncate">{listing.title}</h3>
                   <p className="text-blue-400 font-bold text-xl mb-2">
                     {listing.price.toLocaleString()} ₸

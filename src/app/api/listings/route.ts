@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, description, price, city, category } = body;
+   const { title, description, price, city, category, images } = body;
 
     if (!title || !description || !price || !city || !category) {
       return NextResponse.json({ error: "Заполните все поля" }, { status: 400 });
@@ -62,15 +62,15 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: "Пользователь не найден" }, { status: 404 });
 
     const listing = await prisma.listing.create({
-      data: {
-        title,
-        description,
-        price: parseInt(price),
-        city,
-        category,
-        images: [],
-        authorId: user.id,
-      },
+data: {
+  title,
+  description,
+  price: parseInt(price),
+  city,
+  category,
+  images: images || [],
+  authorId: user.id,
+},
     });
 
     return NextResponse.json(listing, { status: 201 });

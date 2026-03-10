@@ -59,10 +59,18 @@ export default function ListingPage() {
         </Link>
 
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-8">
-          {/* Фото */}
-          <div className="bg-slate-700 rounded-xl h-64 flex items-center justify-center mb-6">
-            <span className="text-slate-500">Нет фото</span>
-          </div>
+{/* Фото */}
+{listing.images && listing.images.length > 0 ? (
+  <div className="flex gap-3 overflow-x-auto mb-6">
+    {listing.images.map((img: string, i: number) => (
+      <img key={i} src={img} alt="" className="h-64 rounded-xl object-cover" />
+    ))}
+  </div>
+) : (
+  <div className="bg-slate-700 rounded-xl h-64 flex items-center justify-center mb-6">
+    <span className="text-slate-500">Нет фото</span>
+  </div>
+)}
 
           <div className="flex items-start justify-between mb-4">
             <h1 className="text-3xl font-bold text-white">{listing.title}</h1>

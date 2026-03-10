@@ -20,6 +20,7 @@ export default function CreateListingPage() {
   const { data: session, status } = useSession();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
 
   if (status === "unauthenticated") {
     return (
@@ -33,6 +34,43 @@ export default function CreateListingPage() {
       </div>
     );
   }
+
+function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const files = Array.from(e.target.files || []);
+  files.slice(0, 5).forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxSize = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > maxSize) {
+          height = (height * maxSize) / width;
+          width = maxSize;
+        } else if (height > maxSize) {
+          width = (width * maxSize) / height;
+          height = maxSize;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL("image/jpeg", 0.7);
+        setImages((prev) => [...prev, compressed]);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeImage(index: number) {
+  setImages((prev) => prev.filter((_, i) => i !== index));
+}
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -49,7 +87,7 @@ export default function CreateListingPage() {
     const res = await fetch("/api/listings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description, price, city, category }),
+      body: JSON.stringify({ title, description, price, city, category, images }),
     });
 
     if (res.ok) {
@@ -99,6 +137,27 @@ export default function CreateListingPage() {
                 ))}
               </select>
             </div>
+
+            {/* Загрузка фото */}
+            <div>
+              <label className="text-slate-300 text-sm mb-2 block">Фото (до 5 штук)</label>
+              <input type="file" accept="image/*" multiple onChange={handleImageChange}
+                className="w-full bg-slate-700 border border-slate-600 text-slate-400 rounded-lg px-4 py-2 focus:outline-none" />
+              {images.length > 0 && (
+                <div className="flex gap-3 mt-3 flex-wrap">
+                  {images.map((img, i) => (
+                    <div key={i} className="relative">
+                      <img src={img} alt="" className="w-20 h-20 object-cover rounded-lg" />
+                      <button type="button" onClick={() => removeImage(i)}
+                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {error && <p className="text-red-400 text-sm">{error}</p>}
             <button type="submit" disabled={loading}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-500 disabled:opacity-50 font-semibold transition-colors">
